@@ -2,11 +2,18 @@
 title: "index"
 author: "Maas Hermes"
 date: "2023-03-01"
-output: html_document
+output: 
+  flexdashboard::flex_dashboard:
+  storyboard: true
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+Sys.setenv(SPOTIFY_CLIENT_ID = 'a34037c68c8c4321ab292374b43edd48')
+Sys.setenv(SPOTIFY_CLIENT_SECRET = 'c27edddbb73b47e191cdb8613b60c69b')
+access_token <- get_spotify_access_token()
+play1 <- get_playlist_audio_features("", "")
 ```
 
 ## R Markdown
@@ -28,3 +35,58 @@ plot(pressure)
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+### Plot 1
+
+bzt <-
+  get_tidy_audio_analysis("5ZLkc5RY1NM4FtGWEd6HOE") |> # Change URI.
+  compmus_align(bars, segments) |>                     # Change `bars`
+  select(bars) |>                                      #   in all three
+  unnest(bars) |>                                      #   of these lines.
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  ) |>
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  )
+  
+  bzt |>
+  compmus_gather_timbre() |>
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = basis,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude") +
+  scale_fill_viridis_c() +                              
+  theme_classic()
+
+bzt |>
+  compmus_self_similarity(timbre, "cosine") |> 
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  geom_tile() +
+  coord_fixed() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_classic() +
+  labs(x = "", y = "")
+
