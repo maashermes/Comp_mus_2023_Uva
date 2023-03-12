@@ -18,7 +18,8 @@ library(dplyr)
 library(compmus)
 
 # load playlists
-FlyMeToTheMoon <- get_playlist_audio_features("", "1tF2AxJkKufGgu6OTyWTgQ")
+FlyMeToTheMoon_play <- get_playlist_audio_features("", "1tF2AxJkKufGgu6OTyWTgQ")
+BobOmb_play <- get_playlist_audio_features("", "0zf0XjYpSmXZPe7VlVrJI6")
 knitr::opts_chunk$set(echo = FALSE)
 
 
@@ -29,9 +30,7 @@ knitr::opts_chunk$set(echo = FALSE)
  
 # Page 1 {.storyboard}
 
-### Plot 1
-***
-hoi
+### Plot 1: Fly me to the moon
 
 ```{r}
 wood <- 
@@ -53,7 +52,26 @@ wood %>%
     theme_minimal()
 ```
 
-### plt 2
+### Plot 2: Bob-omb Battlefield
+```{r}
+wood <- 
+    get_tidy_audio_analysis('581IpQMQrx09Kn4YjiSlsr') %>% 
+    select(segments) %>% unnest(segments) %>% 
+    select(start, duration, pitches)
+    
+wood %>% 
+    mutate(pitches = map(pitches, compmus_normalise, 'euclidean')) %>% 
+    compmus_gather_chroma %>% 
+    ggplot(
+        aes(
+            x = start + duration / 2, 
+            width = duration, 
+            y = pitch_class, 
+            fill = value)) + 
+    geom_tile() +
+    labs(x = 'Time (s)', y = NULL, fill = 'Magnitude') +
+    theme_minimal()
+```
 
 # Page 2 {.storyboard}
 h
