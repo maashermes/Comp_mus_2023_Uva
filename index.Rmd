@@ -27,7 +27,17 @@ knitr::opts_chunk$set(echo = FALSE)
 #Sys.setenv(SPOTIFY_CLIENT_SECRET = 'c27edddbb73b47e191cdb8613b60c69b')
 #access_token <- get_spotify_access_token()
 ```
- 
+# page 0 {.storyboard}
+
+---
+title: "Include spotify"
+output: html_document
+---
+  
+```{r, out.extra=c('allow="encrypted-media"', 'allowtransparency="true"', 'frameBorder="0"')}
+knitr::include_url("https://open.spotify.com/embed/playlist/1tF2AxJkKufGgu6OTyWTgQ?utm_source=generator", height = "380")
+```
+
 # Page 1 {.storyboard}
 
 ### Plot 1: Fly me to the moon
