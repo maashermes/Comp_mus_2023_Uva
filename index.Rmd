@@ -6,11 +6,11 @@ output:
   flexdashboard::flex_dashboard:
     theme:
       version: 4
-      bg: "#101010"
-      fg: "#FDF7F7" 
-      primary: "#ED79F9"
-      navbar-bg: "#3ADAC6"
-      base_font: 
+      bg: "#FFDE95"
+      fg: "#000000"
+      primary: "#E695FF" 
+      navbar-bg: "#9596FF"
+      base_font:
         google: Prompt
       heading_font:
         google: Sen
@@ -34,8 +34,9 @@ library(dplyr)
 library(compmus)
 library(bslib)
 
+thematic::thematic_rmd()
 # load playlists
-flyMe_play <- get_playlist_audio_features("", "1tF2AxJkKufGgu6OTyWTgQ")
+flyMe_play <- get_playlist_audio_features("", "52AGhbgpfzebmkZoZbLBHr")
 bobOmb_play <- get_playlist_audio_features("", "0zf0XjYpSmXZPe7VlVrJI6")
 knitr::opts_chunk$set(echo = FALSE)
 
@@ -47,10 +48,28 @@ knitr::opts_chunk$set(echo = FALSE)
 
 # page 0 {.storyboard}
 
+### Introduction
+
+Before anyone sees this: This is all very work in progress since I just started over with my flex dashboard so Im missing all the previous homework assignments. I do have a tempo oriented tab on page 2. So some feedback on that would be appreciated. Now on to the actual introduction:
+
+Last year, “The 8-Bit Big Band” lead by composer and arranger Charlie Rosen won a Grammy for their arrangement of “Meta-Knights Revenge” from the 1996 video game “Kirby Super Star”. This was quite surprising for a lot of people, given the source material being from an over 20-year-old video game. This is not the only case though, since recently a lot of musicians arrange and cover pieces of music from old video games. Rosen noted in a [Forbes magazine interview](https://www.forbes.com/sites/darrynking/2020/01/20/exploring-the-great-video-game-songbook-with-charlie-rosen/?sh=112dfd0b343b) however, that are a lot of similarities between this current movement and of a movement of the past:
+
+“In the past, people created these collections of music. For example, we refer to the Great American Songbook, which originated in American culture in the 20s, 30s and 40s. There are Broadway show tunes. Movie scores.
+Today, there’s a whole new generation of people that grew up with a new kind of songbook – the Video Game Songbook: a collection of themes and melodies and music that we associate with the experience of playing video games. It’s a touchstone for a generation of people that grew up with digital media and interactive media, a big focal point of their upbringing.”
+He further argues that there are similarities in the actual music of these collections. This is what I will be researching in this portfolio through computational analysis. To what extent can we see similarities in the music of the Great American Songbook, and the Video Game Songbook. 
+
+To do this I will be looking at to of the most covered songs in these respective books: 
+“Fly Me To The Moon (In Other Words)”, representing the Great American songbook, and “Bob-omb Battlefield”, representing the Video Game Songbook.
+
+“In Other Words”, or now more commonly known as “Fly Me To The Moon”, was originally composed in 1954 by Bart Howard. It was originally composed as a cabaret ballad in 3/4  time. It is a 32-bar composition with an ABAB form. This version was written specifically for only piano and vocals. Some notable covers include the 1962 Joe Harnell arrangement which popularized the bossa-nova style for the song. Quincy Jones’ arrangement is notable for putting it in a even 4/4 time. Later in 1964, he worked with Frank Sinatra and Count Basie to make the most well known version of the song to date. This version is a bombastic big band swing arrangement in a 4/4 time. This version is the one most people think of as “the original” even though it is very different from the original 1954 composition.
+
+“Bob-omb Battlefield” was composed in 1996 by Koji Kondo for the video game “Super Mario 64”. The 34-bar composition is originally written in the key of C major in 4/4 time. It originally used MIDI instruments due to the data storage limitations of older video game consoles. The original instrumentation puts a lot of emphasis on brass instruments. This instrumentation lends itself well to big-band/jazz arrangements, which is one of the reasons why it’s often covered by jazz musicians.
+
+
 ### Playlists
 
 ```{r, out.extra=c('allow="encrypted-media"', 'allowtransparency="true"', 'frameBorder="0"')}
-knitr::include_url("https://open.spotify.com/embed/playlist/1tF2AxJkKufGgu6OTyWTgQ?utm_source=generator", height = "380")
+knitr::include_url("https://open.spotify.com/embed/playlist/52AGhbgpfzebmkZoZbLBHr?utm_source=generator", height = "380")
 ```
   
 ```{r, out.extra=c('allow="encrypted-media"', 'allowtransparency="true"', 'frameBorder="0"')}
@@ -120,7 +139,13 @@ both |>
   facet_wrap(~category)
 ```
 
-### Tempo curves for songs
+### Histogram of Tempo's analysis
+Looking at the distribution of tempo's we can make a few interesting observations:
+Both songs seem to have a very clear mode. Most songs in the Fly me to the moon dataset seem to have a tempo around 80 bpm. For Bob-omb battlefield this seems to be around 120. With Fly Me To The Moon however, we have another peak around 120bpm. I personally think this is because of two songs that covers often use as a base: the 80 bpm original Bart Howard composition, or the 120bpm Frank Sinatra arrangement. A third group is the songs around 160 bpm. These songs are more similar to the faster bossa-nova version of the song popularized by Joe Harnell.
+
+For Bob-omb battlefield there is not much to note expect for the fact that they arrengements dont stray that far from the original tempo compared to Fly Me To The Moon. Of course it is not fair to directly compare the two since the Fly Me To The Moon dataset is almost three times the size of the Bob-omb Battlefield soundtrack.
+
+### Tempo curves for two songs
 
 ```{r}
 ## Fly me to the moon - Nat king Cole
@@ -165,7 +190,9 @@ insaneintheRain1 <-
   unnest(segments) |>
   select(start, duration, pitches)
 
+
 ```
+
 ```{r}
 compmus_long_distance(
   natKingCole |> mutate(pitches = map(pitches, compmus_normalise, "chebyshev")),
@@ -189,8 +216,12 @@ compmus_long_distance(
   scale_fill_viridis_c(guide = NULL)
 ```
 
-### bob omb battlefield similiarty
+### Similarity of Fly Me To The Moon covers
+Although these two songs have the same general structure and chord progression, they are in a different key. Making it so we can not see anything on the similarity "curve".
+
+### Similarity matrix for Insaneintherain's Year 1 and Pedro Esparza's covers
 ```{r}
+
 compmus_long_distance(
   pedroEsparza |> mutate(pitches = map(pitches, compmus_normalise, "chebyshev")),
   insaneintheRain1 |> mutate(pitches = map(pitches, compmus_normalise, "chebyshev")),
@@ -212,3 +243,6 @@ compmus_long_distance(
   theme_minimal() +
   scale_fill_viridis_c(guide = NULL)
 ```
+
+### Similarity of Bob-omb battlefield covers
+These two covers of Bob-omb Battlefield are very similar in form, and both follow the original composition very closely, which we can see in this graph by looking at the vague diagonal from the origin. The diagonal becomes even harder to see later in the song since in both arrangements a solo starts over the entire 32 bars, which in both songs are different. The arrangement by Insaneintherainmusic however continues for longer than Esparza's cover which explains the graph being greater in height than in length. In this second part you can still see some diagonals hinting at similarities, since this cover repeats the first half of the song.
