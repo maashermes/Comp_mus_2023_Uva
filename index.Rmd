@@ -22,8 +22,10 @@ output:
           local: false
   storyboard: true
   
+  
 ---
 
+<link rel="TestLogo.png" href="TestLogo.png">
 
 ```{r setup, include=FALSE}
 
