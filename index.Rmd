@@ -4,7 +4,7 @@ author: "Maas Hermes"
 date: "2023-03-01"
 output: 
   flexdashboard::flex_dashboard:
-    logo: C:\Users\maash\OneDrive\Documents\Spriteos\ManLogo.png
+    logo: TestLogo.png
     theme:
       version: 4
       bg: "#FFDE95"
