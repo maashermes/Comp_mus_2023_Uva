@@ -9,7 +9,7 @@ output:
       version: 4
       bg: "#FFDE95"
       fg: "#000000"
-      primary: "#E695FF" 
+      primary: "#FF95DE" 
       navbar-bg: "#9596FF"
       base_font:
         google: Prompt
@@ -142,7 +142,7 @@ both |>
   facet_wrap(~category)
 ```
 
-### Histogram of Tempo's analysis
+***
 Looking at the distribution of tempo's we can make a few interesting observations:
 Both songs seem to have a very clear mode. Most songs in the Fly me to the moon dataset seem to have a tempo around 80 bpm. For Bob-omb battlefield this seems to be around 120. With Fly Me To The Moon however, we have another peak around 120bpm. I personally think this is because of two songs that covers often use as a base: the 80 bpm original Bart Howard composition, or the 120bpm Frank Sinatra arrangement. A third group is the songs around 160 bpm. These songs are more similar to the faster bossa-nova version of the song popularized by Joe Harnell.
 
@@ -219,7 +219,8 @@ compmus_long_distance(
   scale_fill_viridis_c(guide = NULL)
 ```
 
-### Similarity of Fly Me To The Moon covers
+***
+
 Although these two songs have the same general structure and chord progression, they are in a different key. Making it so we can not see anything on the similarity "curve".
 
 ### Similarity matrix for Insaneintherain's Year 1 and Pedro Esparza's covers
@@ -247,5 +248,9 @@ compmus_long_distance(
   scale_fill_viridis_c(guide = NULL)
 ```
 
-### Similarity of Bob-omb battlefield covers
+***
 These two covers of Bob-omb Battlefield are very similar in form, and both follow the original composition very closely, which we can see in this graph by looking at the vague diagonal from the origin. The diagonal becomes even harder to see later in the song since in both arrangements a solo starts over the entire 32 bars, which in both songs are different. The arrangement by Insaneintherainmusic however continues for longer than Esparza's cover which explains the graph being greater in height than in length. In this second part you can still see some diagonals hinting at similarities, since this cover repeats the first half of the song.
+
+<iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/0i4fKtQP3EeS0a6VRXoGNX" width="100%" height="85" frameBorder="0" allowtransparency="true" allow="encrypted-media" data-external="1"></iframe>
+
+<iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/4jOcYDQnclBa5n7HYyEcKI" width="100%" height="85" frameBorder="0" allowtransparency="true" allow="encrypted-media" data-external="1"></iframe>
