@@ -254,3 +254,42 @@ These two covers of Bob-omb Battlefield are very similar in form, and both follo
 <iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/0i4fKtQP3EeS0a6VRXoGNX" width="100%" height="85" frameBorder="0" allowtransparency="true" allow="encrypted-media" data-external="1"></iframe>
 
 <iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/4jOcYDQnclBa5n7HYyEcKI" width="100%" height="85" frameBorder="0" allowtransparency="true" allow="encrypted-media" data-external="1"></iframe>
+
+### Tempogram for Fly me to the moon
+```{r}
+allThatJazz <- get_tidy_audio_analysis("29V4I3HxF3lWitweGJ2m70")
+
+allThatJazz |>
+  tempogram(window_size = 8, hop_size = 1, cyclic = FALSE) |>
+  ggplot(aes(x = time, y = bpm, fill = power)) +
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +
+  labs(x = "Time (s)", y = "Tempo (BPM)") +
+  theme_classic()
+```
+
+***
+This instrumental rendition has quite the interesting structure tempo-wise. It starts of with a very slow rubato intro. Rubato is generally very hard for an tempogram to interpret as there is no clear tempo in the first place. Around the one minute 30 mark, the tempo changes drastically though. The piano now plays a high tempo, walking bass, bassline. This is a lot easier for the tempogram to interpret as we can see in the clear horizontal line.
+
+<iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/29V4I3HxF3lWitweGJ2m70" width="100%" height="85" frameBorder="0" allowtransparency="true" allow="encrypted-media" data-external="1"></iframe>
+
+
+### Tempogram for Bob-omb Battlefield
+```{r}
+insaneInTheRain7 <- get_tidy_audio_analysis("3qf0GH0TFCJ3nFxVKWuzql")
+
+insaneInTheRain7 |>
+  tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |>
+  ggplot(aes(x = time, y = bpm, fill = power)) +
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +
+  labs(x = "Time (s)", y = "Tempo (BPM)") +
+  theme_classic()
+```
+
+***
+Half way through the song there is a part where bars get repeated and a lot of slow down occurs. making it more difficult for the tempogram to now what bpm we are dealing with.
+
+<iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/3qf0GH0TFCJ3nFxVKWuzql" width="100%" height="85" frameBorder="0" allowtransparency="true" allow="encrypted-media" data-external="1"></iframe>
+
+
