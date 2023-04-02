@@ -112,13 +112,6 @@ both |>
       x = valence,
       y = energy,
       label = label
-    ),
-    data = 
-      tibble(
-        label = c("Altijd wel iemand", "ENERGY"),
-        category = c("Edisons", "Grammys"),
-        valence = c(0.090, 0.123),
-        energy = c(0.101, 0.967)
       ),
     colour = "black",         # Override colour (not mode here).
     size = 3,                 # Override size (not loudness here).
@@ -160,29 +153,35 @@ both |>
 
 ### Plot 1: Structure of Fly Me To The Moon
 
-```{r}
-felicia_self <-
-  get_tidy_audio_analysis("491p1VdvFzZ9TSu51QrA3k") |> # Change URI.
-  compmus_align(bars, segments) |>                     # Change `bars`
-  select(bars) |>                                      #   in all three
-  unnest(bars) |>                                      #   of these lines.
+```{r selfsim_moon}
+felicia <-
+  get_tidy_audio_analysis("491p1VdvFzZ9TSu51QrA3k") |>
+  compmus_align(bars, segments) |>
+  select(bars) |>
+  unnest(bars) |>
   mutate(
     pitches =
       map(segments,
         compmus_summarise, pitches,
-        method = "rms", norm = "euclidean"              # Change summary & norm.
+        method = "acentre", norm = "manhattan"
       )
   ) |>
   mutate(
     timbre =
       map(segments,
         compmus_summarise, timbre,
-        method = "rms", norm = "euclidean"              # Change summary & norm.
+        method = "mean"
       )
   )
-
-felicia_self |>
-  compmus_self_similarity(timbre, "cosine") |> 
+bind_rows(
+  felicia |> 
+    compmus_self_similarity(pitches, "aitchison") |> 
+    mutate(d = d / max(d), type = "Chroma"),
+  felicia |> 
+    compmus_self_similarity(timbre, "euclidean") |> 
+    mutate(d = d / max(d), type = "Timbre")
+) |>
+  mutate() |> 
   ggplot(
     aes(
       x = xstart + xduration / 2,
@@ -194,11 +193,66 @@ felicia_self |>
   ) +
   geom_tile() +
   coord_fixed() +
-  scale_fill_viridis_c(guide = "none") +
-  theme_classic() +
+  facet_wrap(~type) +
+  scale_fill_viridis_c(option = "E", guide = "none") +
+  theme_classic() + 
   labs(x = "", y = "")
 ```
+
+***
+
+The two self-similarity matrices at the right
+
 ### Plot 2: Structure of Bob-omb Battlefield
+
+```{r selfsim_bob}
+pedro <-
+  get_tidy_audio_analysis("4jOcYDQnclBa5n7HYyEcKI") |>
+  compmus_align(bars, segments) |>
+  select(bars) |>
+  unnest(bars) |>
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "acentre", norm = "manhattan"
+      )
+  ) |>
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "mean"
+      )
+  )
+bind_rows(
+  pedro |> 
+    compmus_self_similarity(pitches, "aitchison") |> 
+    mutate(d = d / max(d), type = "Chroma"),
+  pedro |> 
+    compmus_self_similarity(timbre, "euclidean") |> 
+    mutate(d = d / max(d), type = "Timbre")
+) |>
+  mutate() |> 
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  geom_tile() +
+  coord_fixed() +
+  facet_wrap(~type) +
+  scale_fill_viridis_c(option = "E", guide = "none") +
+  theme_classic() + 
+  labs(x = "", y = "")
+```
+
+***
+bababooey.
 
 # Page 4: Chromagrams of the two songs{.storyboard}
 
@@ -291,7 +345,7 @@ plot_grid(felicia_plot, frank_plot, joeharnell_plot, ncol = 1)
 ```
 
 ***
-Here we see the chromagrams for three notable renditions of fly me to the moon: Felicia Sanders "original" version, Frank Sinatra's famous big band version and Joe Harnell's bossa nova arrangement. Plotting the three next to each other shows us how differently the songs are chroma-wise.
+Here we see the chromagrams for three notable renditions of fly me to the moon: Felicia Sanders "original" version, Frank Sinatra's famous big band version and Joe Harnell's bossa nova arrangement. Plotting the three next to each other shows us how differently the songs are chroma-wise. They do have a couple of similarities we can spot through these chromagrams though. Th emost notable similarity is the fact that we can recognize the downward motion in the chord progression in all the versions. All versions "walk down" the circle of fifths by going a fourth down and then a third up. We can recognize these "downward stairs" in all of the versions, showing us that this is what makes them still link to the original song.
 
 ### Plot 2: Bob-omb Battlefield
 ```{r pop-chroma2}
@@ -326,6 +380,7 @@ pedro_plot <-
     )
   ) +
   geom_tile() +
+  geom_vline(xintercept = 38, colour = "blue") +
   labs(
     x = "Time (s)", 
     y = NULL, 
@@ -347,6 +402,7 @@ consouls_plot <-
     )
   ) +
   geom_tile() +
+  geom_vline(xintercept = 59, colour = "blue") +
   labs(
     x = "Time (s)", 
     y = NULL, 
@@ -369,6 +425,7 @@ eightbit_plot <-
   ) +
   geom_tile() +
   geom_vline(xintercept = 154, colour = "red") +
+  geom_vline(xintercept = 40, colour = "blue") +
   labs(
     x = "Time (s)", 
     y = NULL, 
@@ -381,7 +438,11 @@ plot_grid(pedro_plot, consouls_plot, eightbit_plot, ncol = 1)
 ```
 
 ***
-Here we see the chromagrams for three notable renditions of Bob-omb battlefield: Pedro Esparza's version, since it is the closest to the original (which is not on Spotify sadly). The Consouls' funk-soul version, and finally the arrangement by Charlie Rosen performed by the 8-Bit Big Band. Just as with Fly me To The Moon, we can see that the chromagrams all look quite differently, we can even see a semitone modulation in Charlie Rosen's piece, not seen in the other versions (marked by the red line).
+Here we see the chromagrams for three notable renditions of Bob-omb battlefield: Pedro Esparza's version, since it is the closest to the original (which is not on Spotify sadly). The Consouls' funk-soul version, and finally the arrangement by Charlie Rosen performed by the 8-Bit Big Band. 
+
+Just as with Fly me To The Moon, we can see that the chromagrams all look quite different. There are some similarities though.For instance, the chromatic descent repeated three times in the final section of the song can be recognized in all the songs (Marked with a blue line).
+
+Some things are quite different though, such as the opening of The Consouls' arrangement repeating the A-section one more time before beginning the chord progression. Another example is the semitone modulation in Charlie Rosen's piece, not seen in the other versions (marked by the red line).
 
 
 # Page 2: Tempo{.storyboard}
@@ -407,22 +468,9 @@ Both songs seem to have a very clear mode. Most songs in the Fly me to the moon 
 
 For Bob-omb battlefield there is not much to note expect for the fact that they arrangements do not stray that far from the original tempo compared to Fly Me To The Moon. Of course it is not fair to directly compare the two since the Fly Me To The Moon dataset is almost three times the size of the Bob-omb Battlefield soundtrack.
 
-### Tempo curves for two songs
 
+### Similarity matrix for Insaneintherain's Year 1 and Pedro Esparza's covers
 ```{r}
-## Fly me to the moon - Nat king Cole
-natKingCole <-
-  get_tidy_audio_analysis("2waiAcLQiqlX5bzvLtNUA0") |>
-  select(segments) |>
-  unnest(segments) |>
-  select(start, duration, pitches)
-
-## Fly me to the moon - Ella Fitzgerald
-ellaFitz <-
-  get_tidy_audio_analysis("7hKNhP1e4TuBYaxLgpVItK") |>
-  select(segments) |>
-  unnest(segments) |>
-  select(start, duration, pitches)
 
 ## Bob-omb battlefield - Insaneintherainmusic2
 insaneInTheRain2 <-
@@ -452,38 +500,6 @@ insaneintheRain1 <-
   unnest(segments) |>
   select(start, duration, pitches)
 
-
-```
-
-```{r}
-compmus_long_distance(
-  natKingCole |> mutate(pitches = map(pitches, compmus_normalise, "chebyshev")),
-  ellaFitz |> mutate(pitches = map(pitches, compmus_normalise, "chebyshev")),
-  feature = pitches,
-  method = "euclidean"
-) |>
-  ggplot(
-    aes(
-      x = xstart + xduration / 2,
-      width = xduration,
-      y = ystart + yduration / 2,
-      height = yduration,
-      fill = d
-    )
-  ) +
-  geom_tile() +
-  coord_equal() +
-  labs(x = "Nat King Cole", y = "Ella Fitzgerald") +
-  theme_minimal() +
-  scale_fill_viridis_c(guide = NULL)
-```
-
-***
-
-Although these two songs have the same general structure and chord progression, they are in a different key. Making it so we can not see anything on the similarity "curve".
-
-### Similarity matrix for Insaneintherain's Year 1 and Pedro Esparza's covers
-```{r}
 
 compmus_long_distance(
   pedroEsparza |> mutate(pitches = map(pitches, compmus_normalise, "chebyshev")),
@@ -528,7 +544,7 @@ allThatJazz |>
 ```
 
 ***
-This instrumental rendition has quite the interesting structure tempo-wise. It starts of with a very slow rubato intro. Rubato is generally very hard for an tempogram to interpret as there is no clear tempo in the first place. Around the one minute 30 mark, the tempo changes drastically though. The piano now plays a high tempo, walking bass, bassline. This is a lot easier for the tempogram to interpret as we can see in the clear horizontal line.
+This instrumental rendition is a good example of the biggest tempo-anomalies in the Fly Me To The Moon playlist. Multiple songs have a rubato part somewhere in the song. This version starts off with a very slow rubato intro. Rubato is generally very hard for an tempogram to interpret as there is no clear tempo in the first place. Around the one minute 30 mark, the tempo changes drastically though. The piano now plays a high tempo, walking bass, bass-line. This is a lot easier for the tempogram to interpret as we can see in the clear horizontal line.
 
 <iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/29V4I3HxF3lWitweGJ2m70" width="100%" height="85" frameBorder="0" allowtransparency="true" allow="encrypted-media" data-external="1"></iframe>
 
@@ -547,7 +563,7 @@ insaneInTheRain7 |>
 ```
 
 ***
-Half way through the song there is a part where bars get repeated and a lot of slow down occurs. making it more difficult for the tempogram to now what bpm we are dealing with.
+At the 100 second mark in the song there is a part where bars get repeated and a lot of slow down occurs. making it more difficult for the tempogram to now what bpm we are dealing with.
 
 <iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/3qf0GH0TFCJ3nFxVKWuzql" width="100%" height="85" frameBorder="0" allowtransparency="true" allow="encrypted-media" data-external="1"></iframe>
 
@@ -575,7 +591,6 @@ all_juice <-
       danceability +
       energy +
       loudness +
-      speechiness +
       acousticness +
       instrumentalness +
       liveness +
@@ -596,14 +611,14 @@ data_for_all_clustering <- all_dist |>
   hclust(method = "average") |> # average for a balanced tree!
   dendro_data() 
 
-# playlist_data_for_join <- allPlay %>%
-#   select(track.name, playlist_name) %>%
-#   mutate(label = str_trunc(track.name, 20))
-# 
-# data_for_all_clustering$labels <- data_for_all_clustering$labels %>%
-#   left_join(playlist_data_for_join)
+ playlist_data_for_join <- allPlay %>%
+   select(track.name, playlist_name) %>%
+   mutate(label = str_trunc(track.name, 20))
 
-#data_for_all_clustering$labels$label <- factor(data_for_all_clustering$labels$label)
+ data_for_all_clustering$labels <- data_for_all_clustering$labels %>%
+   left_join(playlist_data_for_join)
+
+data_for_all_clustering$labels$label <- factor(data_for_all_clustering$labels$label)
 
 
 data_for_all_clustering |>
@@ -625,9 +640,16 @@ data_for_all_clustering |>
       title = "Playlist"
     )
   )
+
 ```
 
+
 ***
-If we try to cluster the songs using an average linking clustering method we see that the clusters it finds are not necessarily clusters separating the two songs. On the bottom and top of the dendogram we can see to clusters of both Fly Me To The Moon and Bob-omb Battlefield respectively. In the middle we have some covers that are closer together to the other song than other covers of the same song. From this we can conclude that the source material is not always 
+
+If we try to cluster the songs using an average linking clustering method, we see that the clusters it finds are not necessarily clusters separating the two songs. We clustered on the following features: danceability, energy, loudness, acousticness, instrumentalness, liveness, valence and tempo. 
+
+On the bottom and top of the dendogram we can see to clusters of both Fly Me To The Moon and Bob-omb Battlefield respectively. In the middle we have some covers that are closer together to the other song than other covers of the same song. From this we can conclude that the source material is not always 
+
 
 # Page 6: Conclusion {.storyboard}
+Through the analysis of the Spotify features and more in-depth analysis techniques we can conclude a couple of things. First of all is the fact that both of the songs show a wide variety of interpretations of the original material.
