@@ -38,6 +38,7 @@ library(compmus)
 library(bslib)
 library(tidymodels)
 library(ggdendro)
+library(cowplot)
 
 thematic::thematic_rmd()
 # load playlists
@@ -46,12 +47,12 @@ bobOmb_play <- get_playlist_audio_features("", "0zf0XjYpSmXZPe7VlVrJI6")
 knitr::opts_chunk$set(echo = FALSE)
 
 
-#Sys.setenv(SPOTIFY_CLIENT_ID = 'a34037c68c8c4321ab292374b43edd48')
-#Sys.setenv(SPOTIFY_CLIENT_SECRET = 'c27edddbb73b47e191cdb8613b60c69b')
+#Sys.setenv(SPOTIFY_CLIENT_ID = '')
+#Sys.setenv(SPOTIFY_CLIENT_SECRET = '')
 #access_token <- get_spotify_access_token()
 ```
 
-# page 0 {.storyboard}
+# Page 1: Introduction{.storyboard}
 
 ### Introduction
 
@@ -80,52 +81,308 @@ knitr::include_url("https://open.spotify.com/embed/playlist/52AGhbgpfzebmkZoZbLB
 ```{r, out.extra=c('allow="encrypted-media"', 'allowtransparency="true"', 'frameBorder="0"')}
 knitr::include_url("https://open.spotify.com/embed/playlist/0zf0XjYpSmXZPe7VlVrJI6?utm_source=generator", height = "380")
 ```
+# Page 2: Spotify feature analysis {.storyboard}
+
+### Plot of energy and valence of the songs
+```{r}
+
+both <-
+  bind_rows(
+    flyMe_play |> mutate(category = "Fly me to the moon"),
+    bobOmb_play |> mutate(category = "Bob-omb battlefield")
+  )
 
 
-# Page 1 {.storyboard}
+both |>                    
+  mutate(
+    mode = ifelse(mode == 0, "Minor", "Major")
+  ) |>
+  ggplot(                     # Set up the plot.
+    aes(
+      x = valence,
+      y = energy,
+      size = loudness,
+      colour = mode
+    )
+  ) +
+  geom_point() +              # Scatter plot.
+  geom_rug(linewidth = 0.1) + # Add 'fringes' to show data distribution.
+  geom_text(                  # Add text labels from above.
+    aes(
+      x = valence,
+      y = energy,
+      label = label
+    ),
+    data = 
+      tibble(
+        label = c("Altijd wel iemand", "ENERGY"),
+        category = c("Edisons", "Grammys"),
+        valence = c(0.090, 0.123),
+        energy = c(0.101, 0.967)
+      ),
+    colour = "black",         # Override colour (not mode here).
+    size = 3,                 # Override size (not loudness here).
+    hjust = "left",           # Align left side of label with the point.
+    vjust = "bottom",         # Align bottom of label with the point.
+    nudge_x = -0.05,          # Nudge the label slightly left.
+    nudge_y = 0.02            # Nudge the label slightly up.
+  ) +
+  facet_wrap(~ category) +    # Separate charts per playlist.
+  scale_x_continuous(         # Fine-tune the x axis.
+    limits = c(0, 1),
+    breaks = c(0, 0.50, 1),   # Use grid-lines for quadrants only.
+    minor_breaks = NULL       # Remove 'minor' grid-lines.
+  ) +
+  scale_y_continuous(         # Fine-tune the y axis in the same way.
+    limits = c(0, 1),
+    breaks = c(0, 0.50, 1),
+    minor_breaks = NULL
+  ) +
+  scale_colour_brewer(        # Use the Color Brewer to choose a palette.
+    type = "qual",            # Qualitative set.
+    palette = "Paired"        # Name of the palette is 'Paired'.
+  ) +
+  scale_size_continuous(      # Fine-tune the sizes of each point.
+    trans = "exp",            # Use an exp transformation to emphasise loud.
+    guide = "none"            # Remove the legend for size.
+  ) +
+  theme_light() +             # Use a simpler theme.
+  labs(                       # Make the titles nice.
+    x = "Valence",
+    y = "Energy",
+    colour = "Mode"
+  )
+
+```
+
+
+# Page 3: Structure of the songs {.storyboard}
+
+### Plot 1: Structure of Fly Me To The Moon
+
+```{r}
+felicia_self <-
+  get_tidy_audio_analysis("491p1VdvFzZ9TSu51QrA3k") |> # Change URI.
+  compmus_align(bars, segments) |>                     # Change `bars`
+  select(bars) |>                                      #   in all three
+  unnest(bars) |>                                      #   of these lines.
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  ) |>
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "rms", norm = "euclidean"              # Change summary & norm.
+      )
+  )
+
+felicia_self |>
+  compmus_self_similarity(timbre, "cosine") |> 
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  geom_tile() +
+  coord_fixed() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_classic() +
+  labs(x = "", y = "")
+```
+### Plot 2: Structure of Bob-omb Battlefield
+
+# Page 4: Chromagrams of the two songs{.storyboard}
 
 ### Plot 1: Fly me to the moon
 
-```{r}
-wood <- 
-    get_tidy_audio_analysis('081AHcLTz6opbo1V9XN8eL') %>% 
-    select(segments) %>% unnest(segments) %>% 
-    select(start, duration, pitches)
-    
-wood %>% 
-    mutate(pitches = map(pitches, compmus_normalise, 'euclidean')) %>% 
-    compmus_gather_chroma %>% 
-    ggplot(
-        aes(
-            x = start + duration / 2, 
-            width = duration, 
-            y = pitch_class, 
-            fill = value)) + 
-    geom_tile() +
-    labs(x = 'Time (s)', y = NULL, fill = 'Magnitude') +
-    theme_minimal()
+
+```{r pop-chroma1}
+frank <-
+  get_tidy_audio_analysis("081AHcLTz6opbo1V9XN8eL") |>
+  select(segments) |>
+  unnest(segments) |>
+  select(start, duration, pitches)
+felicia <-
+  get_tidy_audio_analysis("491p1VdvFzZ9TSu51QrA3k") |>
+  select(segments) |>
+  unnest(segments) |>
+  select(start, duration, pitches)
+joeharnell <-
+  get_tidy_audio_analysis("3buCYwUudNAfPeqfzh5UvJ") |>
+  select(segments) |>
+  unnest(segments) |>
+  select(start, duration, pitches)
 ```
 
-### Plot 2: Bob-omb Battlefield
-```{r}
-wood <- 
-    get_tidy_audio_analysis('581IpQMQrx09Kn4YjiSlsr') %>% 
-    select(segments) %>% unnest(segments) %>% 
-    select(start, duration, pitches)
-    
-wood %>% 
-    mutate(pitches = map(pitches, compmus_normalise, 'euclidean')) %>% 
-    compmus_gather_chroma %>% 
-    ggplot(
-        aes(
-            x = start + duration / 2, 
-            width = duration, 
-            y = pitch_class, 
-            fill = value)) + 
-    geom_tile() +
-    labs(x = 'Time (s)', y = NULL, fill = 'Magnitude') +
-    theme_minimal()
+```{r pop-chroma-plots1}
+felicia_plot <- 
+  felicia |>
+  mutate(pitches = map(pitches, compmus_normalise, "euclidean")) |>
+  compmus_gather_chroma() |> 
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = pitch_class,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(
+    x = "Time (s)", 
+    y = NULL, 
+    fill = "Magnitude", 
+    title = "In Other Words (Felicia Sanders)"
+  ) +
+  theme_minimal() +
+  scale_fill_viridis_c() 
+frank_plot <- 
+  frank |>
+  mutate(pitches = map(pitches, compmus_normalise, "euclidean")) |>
+  compmus_gather_chroma() |> 
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = pitch_class,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(
+    x = "Time (s)", 
+    y = NULL, 
+    fill = "Magnitude", 
+    title = "Fly Me To The Moon (Frank Sinatra)"
+  ) +
+  theme_minimal() +
+  scale_fill_viridis_c() 
+joeharnell_plot <- 
+  joeharnell |>
+  mutate(pitches = map(pitches, compmus_normalise, "euclidean")) |>
+  compmus_gather_chroma() |> 
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = pitch_class,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(
+    x = "Time (s)", 
+    y = NULL, 
+    fill = "Magnitude", 
+    title = "Fly Me To The Moon (Joe Harnell)"
+  ) +
+  theme_minimal() +
+  scale_fill_viridis_c() 
+plot_grid(felicia_plot, frank_plot, joeharnell_plot, ncol = 1)
 ```
+
+***
+Here we see the chromagrams for three notable renditions of fly me to the moon: Felicia Sanders "original" version, Frank Sinatra's famous big band version and Joe Harnell's bossa nova arrangement. Plotting the three next to each other shows us how differently the songs are chroma-wise.
+
+### Plot 2: Bob-omb Battlefield
+```{r pop-chroma2}
+pedro <-
+  get_tidy_audio_analysis("4jOcYDQnclBa5n7HYyEcKI") |>
+  select(segments) |>
+  unnest(segments) |>
+  select(start, duration, pitches)
+consouls <-
+  get_tidy_audio_analysis("6lCWumvyh102pgnpwBEhgn") |>
+  select(segments) |>
+  unnest(segments) |>
+  select(start, duration, pitches)
+eightbit <-
+  get_tidy_audio_analysis("581IpQMQrx09Kn4YjiSlsr") |>
+  select(segments) |>
+  unnest(segments) |>
+  select(start, duration, pitches)
+```
+
+```{r pop-chroma-plots2}
+pedro_plot <- 
+  pedro |>
+  mutate(pitches = map(pitches, compmus_normalise, "euclidean")) |>
+  compmus_gather_chroma() |> 
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = pitch_class,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(
+    x = "Time (s)", 
+    y = NULL, 
+    fill = "Magnitude", 
+    title = "Bob-omb battlefield (Pedro Esparza)"
+  ) +
+  theme_minimal() +
+  scale_fill_viridis_c() 
+consouls_plot <- 
+  consouls |>
+  mutate(pitches = map(pitches, compmus_normalise, "euclidean")) |>
+  compmus_gather_chroma() |> 
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = pitch_class,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(
+    x = "Time (s)", 
+    y = NULL, 
+    fill = "Magnitude", 
+    title = "Bob-omb battlefield (The Consouls)"
+  ) +
+  theme_minimal() +
+  scale_fill_viridis_c() 
+eightbit_plot <- 
+  eightbit |>
+  mutate(pitches = map(pitches, compmus_normalise, "euclidean")) |>
+  compmus_gather_chroma() |> 
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = pitch_class,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  geom_vline(xintercept = 154, colour = "red") +
+  labs(
+    x = "Time (s)", 
+    y = NULL, 
+    fill = "Magnitude", 
+    title = "Bob-omb battlefield (The 8-bit Big Band)"
+  ) +
+  theme_minimal() +
+  scale_fill_viridis_c() 
+plot_grid(pedro_plot, consouls_plot, eightbit_plot, ncol = 1)
+```
+
+***
+Here we see the chromagrams for three notable renditions of Bob-omb battlefield: Pedro Esparza's version, since it is the closest to the original (which is not on Spotify sadly). The Consouls' funk-soul version, and finally the arrangement by Charlie Rosen performed by the 8-Bit Big Band. Just as with Fly me To The Moon, we can see that the chromagrams all look quite differently, we can even see a semitone modulation in Charlie Rosen's piece, not seen in the other versions (marked by the red line).
+
 
 # Page 2: Tempo{.storyboard}
 
@@ -148,7 +405,7 @@ both |>
 Looking at the distribution of tempo's we can make a few interesting observations:
 Both songs seem to have a very clear mode. Most songs in the Fly me to the moon dataset seem to have a tempo around 80 bpm. For Bob-omb battlefield this seems to be around 120. With Fly Me To The Moon however, we have another peak around 120bpm. I personally think this is because of two songs that covers often use as a base: the 80 bpm original Bart Howard composition, or the 120bpm Frank Sinatra arrangement. A third group is the songs around 160 bpm. These songs are more similar to the faster bossa-nova version of the song popularized by Joe Harnell.
 
-For Bob-omb battlefield there is not much to note expect for the fact that they arrengements dont stray that far from the original tempo compared to Fly Me To The Moon. Of course it is not fair to directly compare the two since the Fly Me To The Moon dataset is almost three times the size of the Bob-omb Battlefield soundtrack.
+For Bob-omb battlefield there is not much to note expect for the fact that they arrangements do not stray that far from the original tempo compared to Fly Me To The Moon. Of course it is not fair to directly compare the two since the Fly Me To The Moon dataset is almost three times the size of the Bob-omb Battlefield soundtrack.
 
 ### Tempo curves for two songs
 
@@ -294,24 +551,27 @@ Half way through the song there is a part where bars get repeated and a lot of s
 
 <iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/3qf0GH0TFCJ3nFxVKWuzql" width="100%" height="85" frameBorder="0" allowtransparency="true" allow="encrypted-media" data-external="1"></iframe>
 
-# page 3: Clustering (Not working)
+# page 5: Clustering
 
-### CLustering of all songs
+### Clustering of all songs
 
 
-***
-Due to exams I was not able to make this work properly. I would love if there was something someone can see just by looking at the code. Here is the code I tried:
-
+```{r}
 allPlay <-
   bind_rows(
-    bobOmb_play |> mutate(playlist = "Bob-omb Battlefield") |> slice_head(n = 20),
-    flyMe_play |> mutate(playlist = "Fly Me To The Moon") |> slice_head(n = 20)
+    bobOmb_play |> mutate(playlist = "Bob-omb Battlefield") |> slice_head(n = 10),
+    flyMe_play |> mutate(playlist = "Fly Me To The Moon") |> slice_head(n = 10)
   ) |> 
   add_audio_analysis()
 
+
+allPlay <- allPlay %>%
+  mutate(row_tracker = row_number()) %>%
+  mutate(track.name.new = paste(track.name,row_tracker)) 
+
 all_juice <-
   recipe(
-    track.name ~
+    track.name.new ~
       danceability +
       energy +
       loudness +
@@ -321,14 +581,14 @@ all_juice <-
       liveness +
       valence +
       tempo,
-    data = all_Play
+    data = allPlay
   ) |>
   step_center(all_predictors()) |>
   step_scale(all_predictors()) |> 
   # step_range(all_predictors()) |> 
-  prep(all_Play |> mutate(track.name = str_trunc(track.name, 20))) |>
+  prep(allPlay |> mutate(track.name.new = str_trunc(track.name.new, 50))) |>
   juice() |>
-  column_to_rownames("track.name")
+  column_to_rownames("track.name.new")
 
 all_dist <- dist(all_juice, method = "euclidean")
 
@@ -336,35 +596,38 @@ data_for_all_clustering <- all_dist |>
   hclust(method = "average") |> # average for a balanced tree!
   dendro_data() 
 
-playlist_data_for_join <- allPlay %>%
-  select(track.name, playlist_name) %>%
-  mutate(label = str_trunc(track.name, 20))
+# playlist_data_for_join <- allPlay %>%
+#   select(track.name, playlist_name) %>%
+#   mutate(label = str_trunc(track.name, 20))
+# 
+# data_for_all_clustering$labels <- data_for_all_clustering$labels %>%
+#   left_join(playlist_data_for_join)
 
-data_for_all_clustering$labels <- data_for_all_clustering$labels %>%
-  left_join(playlist_data_for_join)
-
-data_for_all_clustering$labels$label <- factor(data_for_all_clustering$labels$label)
+#data_for_all_clustering$labels$label <- factor(data_for_all_clustering$labels$label)
 
 
 data_for_all_clustering |>
   ggdendrogram() +
   geom_text(data = label(data_for_all_clustering), aes(x, y, 
                                    label=label, 
-                                   hjust=0, 
-                                   colour=playlist_name), size=3) +
+                                   hjust=0), size=2) +
   coord_flip() + 
   scale_y_reverse(expand=c(0.2, 0)) +
   theme(axis.line.y=element_blank(),
         axis.ticks.y=element_blank(),
         axis.text.y=element_blank(),
         axis.title.y=element_blank(),
-        panel.background=element_rect(fill="white"),
+        panel.background=element_rect(fill="#FFDE95"),
         panel.grid=element_blank()) +
-  labs(title = "Playlist Clustering") +
+  labs(title = "Playlist of both songs Clustering") +
   guides(
     colour = guide_legend(
       title = "Playlist"
     )
   )
+```
 
+***
+If we try to cluster the songs using an average linking clustering method we see that the clusters it finds are not necessarily clusters separating the two songs. On the bottom and top of the dendogram we can see to clusters of both Fly Me To The Moon and Bob-omb Battlefield respectively. In the middle we have some covers that are closer together to the other song than other covers of the same song. From this we can conclude that the source material is not always 
 
+# Page 6: Conclusion {.storyboard}
