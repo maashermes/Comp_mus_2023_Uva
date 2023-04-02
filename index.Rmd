@@ -1,5 +1,5 @@
 ---
-title: "Songbook classics"
+title: "Video Games For A New Songbook?"
 author: "Maas Hermes"
 date: "2023-03-01"
 output: 
@@ -56,13 +56,18 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ### Introduction
 
-Before anyone sees this: This is all very work in progress since I just started over with my flex dashboard so Im missing all the previous homework assignments. I do have a tempo oriented tab on page 2. So some feedback on that would be appreciated. Now on to the actual introduction:
+Last year, “The 8-Bit Big Band” lead by composer and arranger Charlie Rosen won a Grammy for their arrangement of “Meta-Knights Revenge” from the 1996 video game “Kirby Super Star”.
 
-Last year, “The 8-Bit Big Band” lead by composer and arranger Charlie Rosen won a Grammy for their arrangement of “Meta-Knights Revenge” from the 1996 video game “Kirby Super Star”. This was quite surprising for a lot of people, given the source material being from an over 20-year-old video game. This is not the only case though, since recently a lot of musicians arrange and cover pieces of music from old video games. Rosen noted in a [Forbes magazine interview](https://www.forbes.com/sites/darrynking/2020/01/20/exploring-the-great-video-game-songbook-with-charlie-rosen/?sh=112dfd0b343b) however, that are a lot of similarities between this current movement and of a movement of the past:
+<iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/1ftMNVbfz95lT3e0SDbIYZ" width="100%" height="85" frameBorder="0" allowtransparency="true" allow="encrypted-media" data-external="1"></iframe>
+
+This was quite surprising for a lot of people, given the source material being from an over 20-year-old video game. This is not the only case though, since recently a lot of musicians arrange and cover pieces of music from old video games. Rosen noted in a [Forbes magazine interview](https://www.forbes.com/sites/darrynking/2020/01/20/exploring-the-great-video-game-songbook-with-charlie-rosen/?sh=112dfd0b343b) however, that there are a lot of similarities between this current movement and of a movement of the past:
 
 “In the past, people created these collections of music. For example, we refer to the Great American Songbook, which originated in American culture in the 20s, 30s and 40s. There are Broadway show tunes. Movie scores.
 Today, there’s a whole new generation of people that grew up with a new kind of songbook – the Video Game Songbook: a collection of themes and melodies and music that we associate with the experience of playing video games. It’s a touchstone for a generation of people that grew up with digital media and interactive media, a big focal point of their upbringing.”
-He further argues that there are similarities in the actual music of these collections. This is what I will be researching in this portfolio through computational analysis. To what extent can we see similarities in the music of the Great American Songbook, and the Video Game Songbook. 
+
+He further argues that there are similarities in the actual music of these collections. This is what I will be researching in this portfolio through computational analysis. To what extent can we see similarities in the music of the Great American Songbook, and the Video Game Songbook? 
+
+
 
 To do this I will be looking at to of the most covered songs in these respective books: 
 “Fly Me To The Moon (In Other Words)”, representing the Great American songbook, and “Bob-omb Battlefield”, representing the Video Game Songbook.
@@ -74,11 +79,11 @@ To do this I will be looking at to of the most covered songs in these respective
 
 ### Playlists
 
-```{r, out.extra=c('allow="encrypted-media"', 'allowtransparency="true"', 'frameBorder="0"')}
+```{r, out.extra=c('allow="encrypted-media"', 'allowtransparency="true"', 'frameBorder="1"')}
 knitr::include_url("https://open.spotify.com/embed/playlist/52AGhbgpfzebmkZoZbLBHr?utm_source=generator", height = "380")
 ```
   
-```{r, out.extra=c('allow="encrypted-media"', 'allowtransparency="true"', 'frameBorder="0"')}
+```{r, out.extra=c('allow="encrypted-media"', 'allowtransparency="true"', 'frameBorder="1"')}
 knitr::include_url("https://open.spotify.com/embed/playlist/0zf0XjYpSmXZPe7VlVrJI6?utm_source=generator", height = "380")
 ```
 # Page 2: Spotify feature analysis {.storyboard}
@@ -88,12 +93,12 @@ knitr::include_url("https://open.spotify.com/embed/playlist/0zf0XjYpSmXZPe7VlVrJ
 
 both <-
   bind_rows(
-    flyMe_play |> mutate(category = "Fly me to the moon"),
-    bobOmb_play |> mutate(category = "Bob-omb battlefield")
+    flyMe_play |> mutate(category = "Fly Me To The Moon"),
+    bobOmb_play |> mutate(category = "Bob-omb Battlefield")
   )
 
 
-both |>                    
+both |>                    # Start with awards.
   mutate(
     mode = ifelse(mode == 0, "Minor", "Major")
   ) |>
@@ -102,24 +107,12 @@ both |>
       x = valence,
       y = energy,
       size = loudness,
-      colour = mode
+      colour = mode,
+      label = track.name
     )
   ) +
   geom_point() +              # Scatter plot.
   geom_rug(linewidth = 0.1) + # Add 'fringes' to show data distribution.
-  geom_text(                  # Add text labels from above.
-    aes(
-      x = valence,
-      y = energy,
-      label = label
-      ),
-    colour = "black",         # Override colour (not mode here).
-    size = 3,                 # Override size (not loudness here).
-    hjust = "left",           # Align left side of label with the point.
-    vjust = "bottom",         # Align bottom of label with the point.
-    nudge_x = -0.05,          # Nudge the label slightly left.
-    nudge_y = 0.02            # Nudge the label slightly up.
-  ) +
   facet_wrap(~ category) +    # Separate charts per playlist.
   scale_x_continuous(         # Fine-tune the x axis.
     limits = c(0, 1),
@@ -139,15 +132,19 @@ both |>
     trans = "exp",            # Use an exp transformation to emphasise loud.
     guide = "none"            # Remove the legend for size.
   ) +
-  theme_light() +             # Use a simpler theme.
   labs(                       # Make the titles nice.
     x = "Valence",
     y = "Energy",
     colour = "Mode"
   )
-
 ```
 
+***
+In this plot we can see the distribution of the different covers of the two songs in valence and energy. We can see that for both songs there is quite a difference in both of these aspects for both songs. This means that arrangements can vary quite a bit. This is a trait of songbook songs. Artist use their general structure but then change a lot of other aspects of the song.
+
+There are a couple of differences between the two songs however. The energy and valence levels are generally lower for Fly Me To The Moon covers. With some of them having an extrodinarily low valence. Bob-omb Battlefield covers tend to have a lot of valence and energy. Both have about the same range of loudness, though Bob-omb Battlefield covers tend to be louder.
+
+Another difference is the distribution of modes. Bob-omb Battlefield are almost always in Major, whilst for Fly Me To The Moon covers it seems to be about a 50/50 major/minor split.
 
 # Page 3: Structure of the songs {.storyboard}
 
@@ -201,11 +198,67 @@ bind_rows(
 
 ***
 
-The two self-similarity matrices at the right
+The self-similarity matrix for the original arrangement sung by Felicia Sanders, shows us the structure of the song. It follows a ABAB format which we can see in the checkerboard pattern of the matrix. It clearly repeats the same chekerboard sizes twice.
 
-### Plot 2: Structure of Bob-omb Battlefield
+<iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/491p1VdvFzZ9TSu51QrA3k" width="100%" height="85" frameBorder="0" allowtransparency="true" allow="encrypted-media" data-external="1"></iframe>
 
-```{r selfsim_bob}
+### Plot 2: Differently structured Fly Me To The Moon
+
+```{r selfsim_ella}
+ella <-
+  get_tidy_audio_analysis("7hKNhP1e4TuBYaxLgpVItK") |>
+  compmus_align(bars, segments) |>
+  select(bars) |>
+  unnest(bars) |>
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "acentre", norm = "manhattan"
+      )
+  ) |>
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "mean"
+      )
+  )
+bind_rows(
+  ella |> 
+    compmus_self_similarity(pitches, "aitchison") |> 
+    mutate(d = d / max(d), type = "Chroma"),
+  ella |> 
+    compmus_self_similarity(timbre, "euclidean") |> 
+    mutate(d = d / max(d), type = "Timbre")
+) |>
+  mutate() |> 
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  geom_tile() +
+  coord_fixed() +
+  facet_wrap(~type) +
+  scale_fill_viridis_c(option = "E", guide = "none") +
+  theme_classic() + 
+  labs(x = "", y = "")
+```
+
+***
+
+Ella Fitzgerald's cover has a different intro then the "original". We can see a bigger checkerboard oattern in the beginning of the song due to this. We can see some similarities to the original structure too.
+
+<iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/7hKNhP1e4TuBYaxLgpVItK" width="100%" height="85" frameBorder="0" allowtransparency="true" allow="encrypted-media" data-external="1"></iframe>
+
+### Plot 3: Structure of Bob-omb Battlefield
+
+```{r selfsim_pedro}
 pedro <-
   get_tidy_audio_analysis("4jOcYDQnclBa5n7HYyEcKI") |>
   compmus_align(bars, segments) |>
@@ -252,7 +305,129 @@ bind_rows(
 ```
 
 ***
-bababooey.
+
+The cover by Pedro Esparza follows the original structure quite closely. It only adds solos over the second half of the song. It follows a AABBCC structure which we can kind of see in the self-similarity matrix.
+
+<iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/4jOcYDQnclBa5n7HYyEcKI" width="100%" height="85" frameBorder="0" allowtransparency="true" allow="encrypted-media" data-external="1"></iframe>
+
+### Plot 4: Differently structured Bob-omb Battlefield
+
+```{r selfsim_consouls}
+consouls <-
+  get_tidy_audio_analysis("6lCWumvyh102pgnpwBEhgn") |>
+  compmus_align(bars, segments) |>
+  select(bars) |>
+  unnest(bars) |>
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "acentre", norm = "manhattan"
+      )
+  ) |>
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "mean"
+      )
+  )
+bind_rows(
+  consouls |> 
+    compmus_self_similarity(pitches, "aitchison") |> 
+    mutate(d = d / max(d), type = "Chroma"),
+  consouls |> 
+    compmus_self_similarity(timbre, "euclidean") |> 
+    mutate(d = d / max(d), type = "Timbre")
+) |>
+  mutate() |> 
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  geom_tile() +
+  coord_fixed() +
+  facet_wrap(~type) +
+  scale_fill_viridis_c(option = "E", guide = "none") +
+  theme_classic() + 
+  labs(x = "", y = "")
+```
+
+***
+
+The arrangement by The Consouls has just like we saw with Fly Me To The Moon a different and longer intro then the original. We can see this by the bigger checkerboard pattern in the beginning.
+
+
+<iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/6lCWumvyh102pgnpwBEhgn" width="100%" height="85" frameBorder="0" allowtransparency="true" allow="encrypted-media" data-external="1"></iframe>
+
+
+
+### Plot 4: Similarity matrix for Insaneintherain's Year 1 and Pedro Esparza's covers
+```{r}
+
+## Bob-omb battlefield - Insaneintherainmusic2
+insaneInTheRain2 <-
+  get_tidy_audio_analysis("3qf0GH0TFCJ3nFxVKWuzql") |>
+  select(segments) |>
+  unnest(segments) |>
+  select(start, duration, pitches)
+
+## Bob-omb battlefield - The Consouls
+consouls <-
+  get_tidy_audio_analysis("6lCWumvyh102pgnpwBEhgn") |>
+  select(segments) |>
+  unnest(segments) |>
+  select(start, duration, pitches)
+
+## Bob-omb battlefield - Pedro Esparza
+pedroEsparza <-
+  get_tidy_audio_analysis("4jOcYDQnclBa5n7HYyEcKI") |>
+  select(segments) |>
+  unnest(segments) |>
+  select(start, duration, pitches)
+
+## Bob-omb battlefield - insaneintherain1
+insaneintheRain1 <-
+  get_tidy_audio_analysis("0i4fKtQP3EeS0a6VRXoGNX") |>
+  select(segments) |>
+  unnest(segments) |>
+  select(start, duration, pitches)
+
+
+compmus_long_distance(
+  pedroEsparza |> mutate(pitches = map(pitches, compmus_normalise, "chebyshev")),
+  insaneintheRain1 |> mutate(pitches = map(pitches, compmus_normalise, "chebyshev")),
+  feature = pitches,
+  method = "euclidean"
+) |>
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  geom_tile() +
+  coord_equal() +
+  labs(x = "Pedro Esparza", y = "Insaneintherainmusic Year 1") +
+  theme_minimal() +
+  scale_fill_viridis_c(guide = NULL)
+```
+
+***
+
+These two covers of Bob-omb Battlefield are very similar in form, and both follow the original composition very closely, which we can see in this graph by looking at the vague diagonal from the origin. The diagonal becomes even harder to see later in the song since in both arrangements a solo starts over the entire 32 bars, which in both songs are different. The arrangement by Insaneintherainmusic however continues for longer than Esparza's cover which explains the graph being greater in height than in length. In this second part you can still see some diagonals hinting at similarities, since this cover repeats the first half of the song.
+
+<iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/0i4fKtQP3EeS0a6VRXoGNX" width="100%" height="85" frameBorder="0" allowtransparency="true" allow="encrypted-media" data-external="1"></iframe>
+
+<iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/4jOcYDQnclBa5n7HYyEcKI" width="100%" height="85" frameBorder="0" allowtransparency="true" allow="encrypted-media" data-external="1"></iframe>
 
 # Page 4: Chromagrams of the two songs{.storyboard}
 
@@ -345,7 +520,14 @@ plot_grid(felicia_plot, frank_plot, joeharnell_plot, ncol = 1)
 ```
 
 ***
+
 Here we see the chromagrams for three notable renditions of fly me to the moon: Felicia Sanders "original" version, Frank Sinatra's famous big band version and Joe Harnell's bossa nova arrangement. Plotting the three next to each other shows us how differently the songs are chroma-wise. They do have a couple of similarities we can spot through these chromagrams though. Th emost notable similarity is the fact that we can recognize the downward motion in the chord progression in all the versions. All versions "walk down" the circle of fifths by going a fourth down and then a third up. We can recognize these "downward stairs" in all of the versions, showing us that this is what makes them still link to the original song.
+
+<iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/491p1VdvFzZ9TSu51QrA3k" width="100%" height="85" frameBorder="0" allowtransparency="true" allow="encrypted-media" data-external="1"></iframe>
+
+<iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/081AHcLTz6opbo1V9XN8eL" width="100%" height="85" frameBorder="0" allowtransparency="true" allow="encrypted-media" data-external="1"></iframe>
+
+<iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/3buCYwUudNAfPeqfzh5UvJ" width="100%" height="85" frameBorder="0" allowtransparency="true" allow="encrypted-media" data-external="1"></iframe>
 
 ### Plot 2: Bob-omb Battlefield
 ```{r pop-chroma2}
@@ -444,16 +626,199 @@ Just as with Fly me To The Moon, we can see that the chromagrams all look quite 
 
 Some things are quite different though, such as the opening of The Consouls' arrangement repeating the A-section one more time before beginning the chord progression. Another example is the semitone modulation in Charlie Rosen's piece, not seen in the other versions (marked by the red line).
 
+<iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/4jOcYDQnclBa5n7HYyEcKI" width="100%" height="85" frameBorder="0" allowtransparency="true" allow="encrypted-media" data-external="1"></iframe>
 
-# Page 2: Tempo{.storyboard}
+<iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/6lCWumvyh102pgnpwBEhgn" width="100%" height="85" frameBorder="0" allowtransparency="true" allow="encrypted-media" data-external="1"></iframe>
 
-### Histogram of Tempi of the two songs
+<iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/581IpQMQrx09Kn4YjiSlsr" width="100%" height="85" frameBorder="0" allowtransparency="true" allow="encrypted-media" data-external="1"></iframe>
+
+# Page 5: Keys{.storyboard}
+
+### Histogram of Keys of the two songs
 
 ```{r}
 both <-
   bind_rows(
-    flyMe_play |> mutate(category = "Fly me to the moon"),
-    bobOmb_play |> mutate(category = "Bob-omb battlefield")
+    flyMe_play |> mutate(category = "Fly Me To The Moon"),
+    bobOmb_play |> mutate(category = "Bob-omb Battlefield")
+  )
+
+both |>
+  ggplot(aes(x = key)) +
+  geom_bar() +
+  facet_wrap(~category) +
+  scale_x_discrete(labels=c("C","C#","D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"))
+
+```
+
+***
+
+As we can see in the distribution of keys, covers of Fly Me To The Moon tend to be a lot more varied in key than covers of Bob-omb Battlefield. This is mainly due to the fact that Fly Me To The Moon covers often have vocals. It is quite common for an artist covering a song to transpose the song to fit their vocal range. This is not necessary for an instrumental song like Bob-omb Battlefield.
+
+### Plot 2: Chordogram for two Bob omb Battlefield arrangements
+
+```{r chordo}
+circshift <- function(v, n) {
+  if (n == 0) v else c(tail(v, n), head(v, -n))
+}
+
+#      C     C#    D     Eb    E     F     F#    G     Ab    A     Bb    B
+major_chord <-
+  c(   1,    0,    0,    0,    1,    0,    0,    1,    0,    0,    0,    0)
+minor_chord <-
+  c(   1,    0,    0,    1,    0,    0,    0,    1,    0,    0,    0,    0)
+seventh_chord <-
+  c(   1,    0,    0,    0,    1,    0,    0,    1,    0,    0,    1,    0)
+
+major_key <-
+  c(6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88)
+minor_key <-
+  c(6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17)
+
+chord_templates <-
+  tribble(
+    ~name, ~template,
+    "Gb:7", circshift(seventh_chord, 6),
+    "Gb:maj", circshift(major_chord, 6),
+    "Bb:min", circshift(minor_chord, 10),
+    "Db:maj", circshift(major_chord, 1),
+    "F:min", circshift(minor_chord, 5),
+    "Ab:7", circshift(seventh_chord, 8),
+    "Ab:maj", circshift(major_chord, 8),
+    "C:min", circshift(minor_chord, 0),
+    "Eb:7", circshift(seventh_chord, 3),
+    "Eb:maj", circshift(major_chord, 3),
+    "G:min", circshift(minor_chord, 7),
+    "Bb:7", circshift(seventh_chord, 10),
+    "Bb:maj", circshift(major_chord, 10),
+    "D:min", circshift(minor_chord, 2),
+    "F:7", circshift(seventh_chord, 5),
+    "F:maj", circshift(major_chord, 5),
+    "A:min", circshift(minor_chord, 9),
+    "C:7", circshift(seventh_chord, 0),
+    "C:maj", circshift(major_chord, 0),
+    "E:min", circshift(minor_chord, 4),
+    "G:7", circshift(seventh_chord, 7),
+    "G:maj", circshift(major_chord, 7),
+    "B:min", circshift(minor_chord, 11),
+    "D:7", circshift(seventh_chord, 2),
+    "D:maj", circshift(major_chord, 2),
+    "F#:min", circshift(minor_chord, 6),
+    "A:7", circshift(seventh_chord, 9),
+    "A:maj", circshift(major_chord, 9),
+    "C#:min", circshift(minor_chord, 1),
+    "E:7", circshift(seventh_chord, 4),
+    "E:maj", circshift(major_chord, 4),
+    "G#:min", circshift(minor_chord, 8),
+    "B:7", circshift(seventh_chord, 11),
+    "B:maj", circshift(major_chord, 11),
+    "D#:min", circshift(minor_chord, 3)
+  )
+
+key_templates <-
+  tribble(
+    ~name, ~template,
+    "Gb:maj", circshift(major_key, 6),
+    "Bb:min", circshift(minor_key, 10),
+    "Db:maj", circshift(major_key, 1),
+    "F:min", circshift(minor_key, 5),
+    "Ab:maj", circshift(major_key, 8),
+    "C:min", circshift(minor_key, 0),
+    "Eb:maj", circshift(major_key, 3),
+    "G:min", circshift(minor_key, 7),
+    "Bb:maj", circshift(major_key, 10),
+    "D:min", circshift(minor_key, 2),
+    "F:maj", circshift(major_key, 5),
+    "A:min", circshift(minor_key, 9),
+    "C:maj", circshift(major_key, 0),
+    "E:min", circshift(minor_key, 4),
+    "G:maj", circshift(major_key, 7),
+    "B:min", circshift(minor_key, 11),
+    "D:maj", circshift(major_key, 2),
+    "F#:min", circshift(minor_key, 6),
+    "A:maj", circshift(major_key, 9),
+    "C#:min", circshift(minor_key, 1),
+    "E:maj", circshift(major_key, 4),
+    "G#:min", circshift(minor_key, 8),
+    "B:maj", circshift(major_key, 11),
+    "D#:min", circshift(minor_key, 3)
+  )
+
+vgjo <-
+  get_tidy_audio_analysis("5beCh5ydb4DFmegHTJI9cy") |>
+  compmus_align(sections, segments) |>
+  select(sections) |>
+  unnest(sections) |>
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "mean", norm = "manhattan"
+      )
+  )
+  
+vgjo_plot <-
+  vgjo |> 
+  compmus_match_pitch_template(
+    chord_templates,         # Change to chord_templates if descired
+    method = "euclidean",  # Try different distance metrics
+    norm = "manhattan"     # Try different norms
+  ) |>
+  ggplot(
+    aes(x = start + duration / 2, width = duration, y = name, fill = d)
+  ) +
+  geom_tile() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_minimal() +
+  labs(x = "Time (s)", y = "")
+
+missingNo <-
+  get_tidy_audio_analysis("7AFNMUovrhCxU2L7PeapDM") |>
+  compmus_align(sections, segments) |>
+  select(sections) |>
+  unnest(sections) |>
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "mean", norm = "manhattan"
+      )
+  )
+  
+missingNo_plot <-
+  missingNo |> 
+  compmus_match_pitch_template(
+    chord_templates,         # Change to chord_templates if descired
+    method = "euclidean",  # Try different distance metrics
+    norm = "manhattan"     # Try different norms
+  ) |>
+  ggplot(
+    aes(x = start + duration / 2, width = duration, y = name, fill = d)
+  ) +
+  geom_tile() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_minimal() +
+  labs(x = "Time (s)", y = "")
+
+plot_grid(vgjo_plot, missingNo_plot, ncol = 1)
+```
+
+*** 
+
+Although the chordogram doesn't always pick it up, these two songs use a lot of different chords. The arrangement by The Consouls uses a lot of soulfull additions to the standard chord progression. The Big band style cover by the Video Game Jazz Orchestra has a lot of extra chords for that extra big band "bombasticity".
+
+<iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/5beCh5ydb4DFmegHTJI9cy" width="100%" height="85" frameBorder="0" allowtransparency="true" allow="encrypted-media" data-external="1"></iframe>
+
+<iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/7AFNMUovrhCxU2L7PeapDM" width="100%" height="85" frameBorder="0" allowtransparency="true" allow="encrypted-media" data-external="1"></iframe>
+# Page 6: Tempo{.storyboard}
+
+### Histogram of Tempos of the two songs
+
+```{r}
+both <-
+  bind_rows(
+    flyMe_play |> mutate(category = "Fly Me To The Moon"),
+    bobOmb_play |> mutate(category = "Bob-omb Battlefield")
   )
 
 both |>
@@ -466,69 +831,7 @@ both |>
 Looking at the distribution of tempo's we can make a few interesting observations:
 Both songs seem to have a very clear mode. Most songs in the Fly me to the moon dataset seem to have a tempo around 80 bpm. For Bob-omb battlefield this seems to be around 120. With Fly Me To The Moon however, we have another peak around 120bpm. I personally think this is because of two songs that covers often use as a base: the 80 bpm original Bart Howard composition, or the 120bpm Frank Sinatra arrangement. A third group is the songs around 160 bpm. These songs are more similar to the faster bossa-nova version of the song popularized by Joe Harnell.
 
-For Bob-omb battlefield there is not much to note expect for the fact that they arrangements do not stray that far from the original tempo compared to Fly Me To The Moon. Of course it is not fair to directly compare the two since the Fly Me To The Moon dataset is almost three times the size of the Bob-omb Battlefield soundtrack.
-
-
-### Similarity matrix for Insaneintherain's Year 1 and Pedro Esparza's covers
-```{r}
-
-## Bob-omb battlefield - Insaneintherainmusic2
-insaneInTheRain2 <-
-  get_tidy_audio_analysis("3qf0GH0TFCJ3nFxVKWuzql") |>
-  select(segments) |>
-  unnest(segments) |>
-  select(start, duration, pitches)
-
-## Bob-omb battlefield - The Consouls
-consouls <-
-  get_tidy_audio_analysis("6lCWumvyh102pgnpwBEhgn") |>
-  select(segments) |>
-  unnest(segments) |>
-  select(start, duration, pitches)
-
-## Bob-omb battlefield - Pedro Esparza
-pedroEsparza <-
-  get_tidy_audio_analysis("4jOcYDQnclBa5n7HYyEcKI") |>
-  select(segments) |>
-  unnest(segments) |>
-  select(start, duration, pitches)
-
-## Bob-omb battlefield - insaneintherain1
-insaneintheRain1 <-
-  get_tidy_audio_analysis("0i4fKtQP3EeS0a6VRXoGNX") |>
-  select(segments) |>
-  unnest(segments) |>
-  select(start, duration, pitches)
-
-
-compmus_long_distance(
-  pedroEsparza |> mutate(pitches = map(pitches, compmus_normalise, "chebyshev")),
-  insaneintheRain1 |> mutate(pitches = map(pitches, compmus_normalise, "chebyshev")),
-  feature = pitches,
-  method = "euclidean"
-) |>
-  ggplot(
-    aes(
-      x = xstart + xduration / 2,
-      width = xduration,
-      y = ystart + yduration / 2,
-      height = yduration,
-      fill = d
-    )
-  ) +
-  geom_tile() +
-  coord_equal() +
-  labs(x = "Pedro Esparza", y = "Insaneintherainmusic Year 1") +
-  theme_minimal() +
-  scale_fill_viridis_c(guide = NULL)
-```
-
-***
-These two covers of Bob-omb Battlefield are very similar in form, and both follow the original composition very closely, which we can see in this graph by looking at the vague diagonal from the origin. The diagonal becomes even harder to see later in the song since in both arrangements a solo starts over the entire 32 bars, which in both songs are different. The arrangement by Insaneintherainmusic however continues for longer than Esparza's cover which explains the graph being greater in height than in length. In this second part you can still see some diagonals hinting at similarities, since this cover repeats the first half of the song.
-
-<iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/0i4fKtQP3EeS0a6VRXoGNX" width="100%" height="85" frameBorder="0" allowtransparency="true" allow="encrypted-media" data-external="1"></iframe>
-
-<iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/4jOcYDQnclBa5n7HYyEcKI" width="100%" height="85" frameBorder="0" allowtransparency="true" allow="encrypted-media" data-external="1"></iframe>
+For Bob-omb battlefield there is not much to note expect for the fact that they arrangements do not stray that far from the original tempo compared to Fly Me To The Moon. Of course it is not fair to directly compare the two, since the Fly Me To The Moon dataset is almost three times the size of the Bob-omb Battlefield dataset.
 
 ### Tempogram for Fly me to the moon
 ```{r}
@@ -563,14 +866,13 @@ insaneInTheRain7 |>
 ```
 
 ***
-At the 100 second mark in the song there is a part where bars get repeated and a lot of slow down occurs. making it more difficult for the tempogram to now what bpm we are dealing with.
+At the 100 second mark in the song there is a part where bars get repeated and a lot of slow down occurs. making it more difficult for the tempogram to now what bpm we are dealing with. This is one of the only interseting tempo related anomalies I could find in the dataset.
 
 <iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/3qf0GH0TFCJ3nFxVKWuzql" width="100%" height="85" frameBorder="0" allowtransparency="true" allow="encrypted-media" data-external="1"></iframe>
 
-# page 5: Clustering
+# page 7: Clustering
 
 ### Clustering of all songs
-
 
 ```{r}
 allPlay <-
@@ -592,7 +894,6 @@ all_juice <-
       energy +
       loudness +
       acousticness +
-      instrumentalness +
       liveness +
       valence +
       tempo,
@@ -600,7 +901,7 @@ all_juice <-
   ) |>
   step_center(all_predictors()) |>
   step_scale(all_predictors()) |> 
-  # step_range(all_predictors()) |> 
+  step_range(all_predictors()) |> 
   prep(allPlay |> mutate(track.name.new = str_trunc(track.name.new, 50))) |>
   juice() |>
   column_to_rownames("track.name.new")
@@ -643,13 +944,18 @@ data_for_all_clustering |>
 
 ```
 
+### Clustering of all songs analysis
 
-***
+If we try to cluster the songs using an average linking clustering method, we see that the clusters it finds are not necessarily clusters separating the two songs. We clustered on the following features: danceability, energy, loudness, acousticness, liveness, valence and tempo. 
 
-If we try to cluster the songs using an average linking clustering method, we see that the clusters it finds are not necessarily clusters separating the two songs. We clustered on the following features: danceability, energy, loudness, acousticness, instrumentalness, liveness, valence and tempo. 
-
-On the bottom and top of the dendogram we can see to clusters of both Fly Me To The Moon and Bob-omb Battlefield respectively. In the middle we have some covers that are closer together to the other song than other covers of the same song. From this we can conclude that the source material is not always 
+On the bottom and top of the dendogram we can see to clusters of both Fly Me To The Moon and Bob-omb Battlefield respectively. In the middle we have some covers that are closer together to the other song than other covers of the same song. From this we can conclude that the source material is not always what completetly dictates the classification of the song.
 
 
-# Page 6: Conclusion {.storyboard}
-Through the analysis of the Spotify features and more in-depth analysis techniques we can conclude a couple of things. First of all is the fact that both of the songs show a wide variety of interpretations of the original material.
+# Page 8: Conclusion {.storyboard}
+
+### Conclusion
+Through the analysis of the Spotify features and more in-depth analysis techniques we can conclude a couple of things. First of all is the fact that both of the songs show a wide variety of interpretations of the original material. The long history of Fly Me To The Moon covers shows itself due to the fact that there is first of all a lot more covers, and due to that more variety in the covers. Although Bob-omb battlefield is relatively new compared to Fly Me To The Moon, it shows some of the same musical characteristics as it. Artists like covering it in certain genres, but note the plural here. Just like Fly Me To The Moon, there are a couple of versions we can already see being used as "new" source material. Charlie Rosens arrangement for the 8-Bit Big Band for instance, inspired a slew of other big band styled covers. What we can also conclude from this portfolio is that video game song covers stick closer to the source material. Not straying that far in tempo and key. Whilst Fly Me To The Moon has seen a lot of different interpretations in that regard.
+
+### Discussion
+ A big limitation of this research was the fairly limited dataset for Bob-Omb Battlefield. This kept a lot of things as speculation: if there were more covers, would we really see more variety in them? Also the fact that the original version is not on spotify makes it difficult to compare to the source material.
+Next to this there are a few technical things I could not get done in time. During one of my later commits I suddenly made some other parts not work. Some things like getting the right labels on the key section, and the clustering page being quite difficult to read are a result of this.
